@@ -1,0 +1,14 @@
+# Ignore virtual environment
+my312env/
+venv/
+.env/
+
+# Ignore python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore IDE settings
+.vscode/
+.idea/
