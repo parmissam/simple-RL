@@ -6,7 +6,7 @@ from typing import Dict, Literal
 import pygame
 from rl_config import get_state, choose_action, save_q_table, load_q_table, actions
 
-Action = Literal["up", "down", "left", "right"]
+#Action = Literal["up", "down", "left", "right"]
 
 
 class Game:
@@ -16,7 +16,7 @@ class Game:
         start: int,
         gui: bool,
         episodes: int,
-        q_table: Dict[int, Dict[Action, float]] | None = None,
+        q_table: Dict[int, Dict[actions, float]] | None = None,
     ) -> None:
         pygame.init()
         self.gui = gui
@@ -24,7 +24,7 @@ class Game:
         self.start = start
         self.alldistance = [0]
         self.episodes = episodes
-        self.q_table: Dict[int, Dict[Action, float]] = q_table if q_table is not None else {}
+        self.q_table: Dict[int, Dict[actions, float]] = q_table if q_table is not None else {}
         self.cell_size = cell_size
         self.grid_size = grid_size
         self.width = self.height = self.grid_size * self.cell_size
@@ -69,7 +69,7 @@ class Game:
         pygame.display.flip()
         self.clock.tick(10)
 
-    def move_player(self, action: Action) -> None:
+    def move_player(self, action: actions) -> None:
         if action == "up":
             self.player_pos[1] -= self.cell_size
         elif action == "down":
@@ -170,10 +170,6 @@ class Game:
                 old_value = self.q_table[state][action]
                 next_max = max(self.q_table[next_state].values())
                 self.q_table[state][action] = (1 - 0.1) * old_value + 0.1 * (reward + 0.9 * next_max)
-                
-                    
-
-
         pygame.quit()
 
 
@@ -186,8 +182,8 @@ if __name__ == "__main__":
     while start == goal:
         start = random.randint(0, grid_size * grid_size - 1)
 
-    episodes = 10
-    gui = True
+    episodes = 50000
+    gui = False
 
     q_table = load_q_table("q_table.json")
 
