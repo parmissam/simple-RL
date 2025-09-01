@@ -60,6 +60,15 @@ class Game:
         for y in range(0, self.height + 1, self.cell_size):
             pygame.draw.line(self.screen, self.line, (0, y), (self.width, y), 1)
 
+    def draw_player(self) -> None:
+        self.screen.fill(self.bg)
+        self.draw_grid()
+        pygame.draw.circle(self.screen, (0, 255, 255), (self.goal_pos[0], self.goal_pos[1]), 10)
+        pygame.draw.circle(self.screen, (255, 0, 0), (self.start_pos[0], self.start_pos[1]), 10)
+        pygame.draw.circle(self.screen, (0, 0, 255), (self.player_pos[0], self.player_pos[1]), 20)
+        pygame.display.flip()
+        self.clock.tick(10)
+
     def move_player(self, action: Action) -> None:
         if action == "up":
             self.player_pos[1] -= self.cell_size
@@ -102,13 +111,16 @@ class Game:
     def run(self) -> None:
         if self.gui:
             self.initialize_gui()
+            self.draw_player()
         for episode in range(self.episodes):
             self.player_pos = [self.start_pos[0], self.start_pos[1]]
             self.alldistance = [10**9]  
             self.penalty = False
             done = False
-
             while not done:
+                if episode == episodes-1 and not self.gui:
+                    self.initialize_gui()
+                    self.gui = True      
                 if self.gui:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -117,6 +129,7 @@ class Game:
                             break
                     if not getattr(self, "running", True):  
                         return
+                    self.draw_player()
 
                 state = get_state(self.player_pos, self.grid_size, self.cell_size)
                 if state not in self.q_table:
@@ -152,29 +165,21 @@ class Game:
                     reward = 100.0
                     print("Reached destination!!")
                     done = True
-
+                    if self.gui:
+                        self.draw_player()
                 old_value = self.q_table[state][action]
                 next_max = max(self.q_table[next_state].values())
                 self.q_table[state][action] = (1 - 0.1) * old_value + 0.1 * (reward + 0.9 * next_max)
-
-                if episode == self.episodes - 1 or self.gui:
-                    self.screen.fill(self.bg)
-                    self.draw_grid()
-                    pygame.draw.circle(self.screen, (0, 0, 255), (self.player_pos[0], self.player_pos[1]), 20)
-                    pygame.draw.circle(self.screen, (0, 255, 255), (self.goal_pos[0], self.goal_pos[1]), 10)
-                    pygame.draw.circle(self.screen, (255, 0, 0), (self.start_pos[0], self.start_pos[1]), 10)
-                    pygame.display.flip()
-                    self.clock.tick(10)
                 
-                if episode == episodes-2:
-                    self.initialize_gui()
+                    
+
 
         pygame.quit()
 
 
 if __name__ == "__main__":
     grid_size = 16
-    cell_size = 50
+    cell_size = 45
 
     goal = random.randint(0, grid_size * grid_size - 1)
     start = random.randint(0, grid_size * grid_size - 1)
